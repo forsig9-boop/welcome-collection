@@ -1,0 +1,31 @@
+/* Зная ФИО клиента, выбрать номера всех его контрактов*/
+SELECT contract.id
+FROM person JOIN contract ON person.id = contract.person_id
+WHERE FIO = 'JOHN SMITH'
+
+/*Зная ФИО нескольких клиентов, выбрать все контракты, у которых долг (Debt) больше тысячи*/
+SELECT contract.id
+FROM person JOIN contract ON person.id = contract.person_id
+WHERE FIO IN ('JOHN SMITH', 'JOHN DOE', 'MARRY MEE') AND contract.debt > 1000
+
+/*Зная ФИО нескольких клиентов, выбрать всех клиентов, у которых сумма долга по всем контрактам больше тысячи*/
+SELECT person.id, person.FIO
+FROM person JOIN contract ON person.id = contract.person_id
+WHERE FIO IN ('JOHN SMITH', 'JOHN DOE', 'MARRY MEE')
+GROUP BY 1,2
+HAVING SUM(contract.debt) > 1000
+
+
+/*Зная номера клиентов, выбрать все их контракты, пронумеровав для каждого клиента его контракты в порядке убывания долга.*/
+SELECT c1.person_id, c1.id, 
+    (
+        SELECT COUNT(*)
+        FROM contract c2
+        WHERE c2.person_id = c1.person_id
+          AND (c2.debt > c1.debt 
+               OR (c2.debt = c1.debt AND c2.id <= c1.id))
+    ) AS contract_number
+FROM contract c1
+WHERE c1.person_id IN (1, 2, 3)
+ORDER BY c1.person_id, contract_number;
+
